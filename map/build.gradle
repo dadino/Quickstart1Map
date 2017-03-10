@@ -1,0 +1,63 @@
+apply plugin: 'com.android.library'
+ext {
+    bintrayRepo = 'quickstart'
+    bintrayName = 'map'
+
+    publishedGroupId = 'com.dadino.quickstart'
+    libraryName = 'QuickStartMap'
+    artifact = 'map'
+
+    libraryDescription = 'Basic toolbox to quickly start coding'
+
+    siteUrl = 'https://github.com/dadino/basictoolbox'
+    gitUrl = 'https://github.com/dadino/basictoolbox.git'
+
+    libraryVersion = '0.1.0'
+
+    developerId = 'dadino'
+    developerName = 'David Corsalini'
+    developerEmail = 'corsalini.david@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 25
+        versionCode 1
+        versionName "0.1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile 'junit:junit:4.12'
+
+    compile 'com.dadino.quickstart:core:0.3.+'
+    compile 'com.google.android.gms:play-services-maps:10.+'
+}
+
+// Place it at the end of the file
+apply from: 'install.gradle'
+apply from: 'bintray.gradle'

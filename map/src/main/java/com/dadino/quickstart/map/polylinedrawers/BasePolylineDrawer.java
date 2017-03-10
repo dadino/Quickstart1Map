@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
+public abstract class BasePolylineDrawer<KEY, ITEM> implements INext<List<ITEM>> {
 
 	private final IPolylineFormatter<ITEM>        formatter;
 	private       OnSearchFromMapListener         searchListener;
 	private       OnPolylineClickedListener<ITEM> polylineClickListener;
 
 	//Maps
-	private Map<Long, PolylinedItem<ITEM>> mapItemPolyline = new HashMap<>();
+	private Map<KEY, PolylinedItem<ITEM>> mapItemPolyline = new HashMap<>();
 
 	//Varius
 	private boolean      mInterceptItemClicks;
@@ -68,7 +68,7 @@ public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
 		this.items = null;
 
 		if (items.isEmpty()) {
-			for (Map.Entry<Long, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
+			for (Map.Entry<KEY, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
 				for (Polyline polyline : entry.getValue()
 				                              .getPolylines()) {
 					polyline.remove();
@@ -85,12 +85,12 @@ public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
 		List<ITEM> itemsToAdd = new ArrayList<>();
 
 		//Remove unneeded items
-		for (Map.Entry<Long, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
+		for (Map.Entry<KEY, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
 			boolean keep = false;
 			final ITEM key = entry.getValue()
 			                      .getItem();
 			for (ITEM item : items) {
-				if (getId(key) == getId(item)) {
+				if (Equal.equals(getId(key), getId(item))) {
 					keep = true;
 					break;
 				}
@@ -106,11 +106,11 @@ public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
 		}
 
 		//Edit changed items
-		for (Map.Entry<Long, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
+		for (Map.Entry<KEY, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
 			final ITEM key = entry.getValue()
 			                      .getItem();
 			for (ITEM item : items) {
-				if (getId(key) == getId(item)) {
+				if (Equal.equals(getId(key), getId(item))) {
 					if (needEdit(key, item)) {
 						itemsToChange.add(item);
 						break;
@@ -135,9 +135,9 @@ public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
 		for (ITEM item : items) {
 			boolean found = false;
 
-			for (Map.Entry<Long, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
-				if (getId(item) == getId(entry.getValue()
-				                              .getItem())) {
+			for (Map.Entry<KEY, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
+				if (Equal.equals(getId(item), getId(entry.getValue()
+				                                         .getItem()))) {
 					found = true;
 					break;
 				}
@@ -184,7 +184,7 @@ public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
 	}
 
 	private void updatePolylinesVisibility() {
-		for (Map.Entry<Long, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
+		for (Map.Entry<KEY, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
 			for (Polyline polyline : entry.getValue()
 			                              .getPolylines()) {
 				polyline.setVisible(isVisible(polyline));
@@ -220,7 +220,7 @@ public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
 
 
 	private ITEM itemFromPolyline(Polyline polyline) {
-		for (Map.Entry<Long, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
+		for (Map.Entry<KEY, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
 			for (Polyline p : entry.getValue()
 			                       .getPolylines()) {
 				if (Equal.equals(p, polyline)) return entry.getValue()
@@ -230,7 +230,7 @@ public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
 		return null;
 	}
 
-	protected abstract long getId(ITEM item);
+	protected abstract KEY getId(ITEM item);
 	protected abstract boolean needEdit(ITEM oldItem, ITEM newItem);
 	protected abstract List<List<LatLng>> getListOfPolylines(ITEM item);
 	protected abstract String className();
@@ -238,7 +238,7 @@ public abstract class BasePolylineDrawer<ITEM> implements INext<List<ITEM>> {
 	@Nullable
 	public LatLngBounds getBounds() {
 		LatLngBounds.Builder builder = LatLngBounds.builder();
-		for (Map.Entry<Long, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
+		for (Map.Entry<KEY, PolylinedItem<ITEM>> entry : mapItemPolyline.entrySet()) {
 			for (Polyline polyline : entry.getValue()
 			                              .getPolylines()) {
 				for (LatLng latLng : polyline.getPoints()) {

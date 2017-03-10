@@ -11,6 +11,7 @@ import com.dadino.quickstart.map.listeners.OnMarkerClickedListener;
 import com.dadino.quickstart.map.listeners.OnMarkerExitAnimationFinishedListener;
 import com.dadino.quickstart.map.listeners.OnSearchFromMapListener;
 import com.dadino.quickstart.map.markerformatters.IMarkerFormatter;
+import com.dadino.quickstart.map.misc.Equal;
 import com.dadino.quickstart.map.wrappeditems.MarkedItem;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
+public abstract class BaseMarkerDrawer<KEY, ITEM> implements INext<List<ITEM>> {
 
 	private static final int MAXIMUM_TOTAL_TIME_FOR_ANIMATION = 1000;
 	private static final int MAXIMUM_DELAY                    = 50;
@@ -32,7 +33,7 @@ public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
 	private       OnInfoWindowClickedListener<ITEM> infoWindowClickListener;
 
 	//Maps
-	private Map<Long, MarkedItem<ITEM>> mapItemMarker = new HashMap<>();
+	private Map<KEY, MarkedItem<ITEM>> mapItemMarker = new HashMap<>();
 
 	//Varius
 	private boolean    mInterceptMarkerClicks;
@@ -83,7 +84,7 @@ public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
 			                                          .size() > 0 ? Math.min(
 					MAXIMUM_TOTAL_TIME_FOR_ANIMATION / mapItemMarker.entrySet()
 					                                                .size(), MAXIMUM_DELAY) : 0;
-			for (Map.Entry<Long, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
+			for (Map.Entry<KEY, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
 				removeMarkerAnimated(removeDelay, entry.getValue());
 				removeDelay += removeDelayStep;
 			}
@@ -98,12 +99,12 @@ public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
 		List<ITEM> itemsToAdd = new ArrayList<>();
 
 		//Remove unneeded items
-		for (Map.Entry<Long, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
+		for (Map.Entry<KEY, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
 			boolean keep = false;
 			final ITEM key = entry.getValue()
 			                      .getItem();
 			for (ITEM item : items) {
-				if (getId(key) == getId(item)) {
+				if (Equal.equals(getId(key), getId(item))) {
 					keep = true;
 					break;
 				}
@@ -121,11 +122,11 @@ public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
 		}
 
 		//Edit changed items
-		for (Map.Entry<Long, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
+		for (Map.Entry<KEY, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
 			final ITEM key = entry.getValue()
 			                      .getItem();
 			for (ITEM item : items) {
-				if (getId(key) == getId(item)) {
+				if (Equal.equals(getId(key), getId(item))) {
 					if (needEdit(key, item)) {
 						itemsToChange.add(item);
 						break;
@@ -144,9 +145,9 @@ public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
 		for (ITEM item : items) {
 			boolean found = false;
 
-			for (Map.Entry<Long, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
-				if (getId(item) == getId(entry.getValue()
-				                              .getItem())) {
+			for (Map.Entry<KEY, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
+				if (Equal.equals(getId(item), getId(entry.getValue()
+				                                         .getItem()))) {
 					found = true;
 					break;
 				}
@@ -235,7 +236,7 @@ public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
 
 
 	private ITEM itemFromMarker(Marker marker) {
-		for (Map.Entry<Long, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
+		for (Map.Entry<KEY, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
 			if (entry.getValue()
 			         .getMarker()
 			         .equals(marker)) return entry.getValue()
@@ -244,14 +245,14 @@ public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
 		return null;
 	}
 
-	protected abstract long getId(ITEM item);
+	protected abstract KEY getId(ITEM item);
 	protected abstract boolean needEdit(ITEM oldItem, ITEM newItem);
 	protected abstract String className();
 
 	@Nullable
 	public LatLngBounds getBounds() {
 		LatLngBounds.Builder builder = LatLngBounds.builder();
-		for (Map.Entry<Long, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
+		for (Map.Entry<KEY, MarkedItem<ITEM>> entry : mapItemMarker.entrySet()) {
 			builder.include(entry.getValue()
 			                     .getMarker()
 			                     .getPosition());
@@ -261,5 +262,9 @@ public abstract class BaseMarkerDrawer<ITEM> implements INext<List<ITEM>> {
 		} catch (IllegalStateException ex) {
 			return null;
 		}
+	}
+
+	public IMarkerFormatter<ITEM> getFormatter() {
+		return formatter;
 	}
 }

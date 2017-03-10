@@ -132,11 +132,16 @@ public abstract class BaseMapController {
 	private void setInitialPosition(Bundle savedInstanceState) {
 		if (savedInstanceState == null) {
 			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-					mInitialPosition == null ? new LatLng(37.6689742, 13.4464143) :
-					mInitialPosition, mInitialPosition == null ? getDefaultZoom() : mInitialZoom);
+					mInitialPosition == null ? getDefaultPosition() : mInitialPosition,
+					mInitialPosition == null ? getDefaultZoom() : mInitialZoom);
 			map.moveCamera(cameraUpdate);
 		}
 	}
+
+	protected LatLng getDefaultPosition() {
+		return new LatLng(37.6689742, 13.4464143);
+	}
+
 
 	@SuppressWarnings("MissingPermission")
 	private void updateMyLocationButton() {

@@ -13,6 +13,7 @@ import com.dadino.quickstart.map.listeners.OnSearchFromMapListener;
 import com.dadino.quickstart.map.markerformatters.IMarkerFormatter;
 import com.dadino.quickstart.map.misc.Equal;
 import com.dadino.quickstart.map.wrappeditems.MarkedItem;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -36,11 +37,12 @@ public abstract class BaseMarkerDrawer<KEY, ITEM> implements INext<List<ITEM>> {
 	private Map<KEY, MarkedItem<ITEM>> mapItemMarker = new HashMap<>();
 
 	//Varius
-	private boolean    mInterceptMarkerClicks;
-	private boolean    mInterceptInfoWindowClicks;
-	private GoogleMap  map;
-	private List<ITEM> items;
-	private boolean    mConsumeMarkerClicks;
+	private boolean          mInterceptMarkerClicks;
+	private boolean          mInterceptInfoWindowClicks;
+	private GoogleMap        map;
+	private List<ITEM>       items;
+	private boolean          mConsumeMarkerClicks;
+	private MarkedItem<ITEM> mSelectedItem;
 
 	public BaseMarkerDrawer(IMarkerFormatter<ITEM> formatter) {
 		this.formatter = formatter;
@@ -138,8 +140,9 @@ public abstract class BaseMarkerDrawer<KEY, ITEM> implements INext<List<ITEM>> {
 		for (ITEM item : itemsToChange) {
 			final Marker marker = mapItemMarker.get(getId(item))
 			                                   .getMarker();
-			mapItemMarker.put(getId(item), new MarkedItem<>(item, marker));
-			formatter.editMarker(marker, item);
+			final MarkedItem<ITEM> markedItem = new MarkedItem<>(item, marker);
+			mapItemMarker.put(getId(item), markedItem);
+			formatter.editMarker(markedItem);
 		}
 
 		//Add new items
@@ -271,5 +274,29 @@ public abstract class BaseMarkerDrawer<KEY, ITEM> implements INext<List<ITEM>> {
 
 	public IMarkerFormatter<ITEM> getFormatter() {
 		return formatter;
+	}
+
+	public void setSelectedItem(ITEM item) {
+		if (mSelectedItem != null) {
+			unhighlightMarker(mSelectedItem);
+		}
+
+		this.mSelectedItem = mapItemMarker.get(getId(item));
+
+		if (mSelectedItem != null) {
+			highlightMarker(mSelectedItem);
+			mSelectedItem.getMarker()
+			             .showInfoWindow();
+			map.animateCamera(CameraUpdateFactory.newLatLng(mSelectedItem.getMarker()
+			                                                             .getPosition()));
+		}
+	}
+
+	private void highlightMarker(MarkedItem markedItem) {
+		formatter.highlightMarker(markedItem);
+	}
+
+	private void unhighlightMarker(MarkedItem markedItem) {
+		formatter.unhighlightMarker(markedItem);
 	}
 }

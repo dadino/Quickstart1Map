@@ -39,7 +39,7 @@ public class MarkerUtils {
 	public static BitmapDescriptor getMarkerIconFromDrawable(Context context,
 	                                                         @DrawableRes int drawableId,
 	                                                         @ColorRes int colorId) {
-		final Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+		final Drawable drawable = VectorCompat.getDrawable(context, drawableId);
 		return getMarkerIconFromDrawable(context, drawable, colorId);
 	}
 

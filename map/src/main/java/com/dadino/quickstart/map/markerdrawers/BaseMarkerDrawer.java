@@ -40,6 +40,7 @@ public abstract class BaseMarkerDrawer<KEY, ITEM> implements INext<List<ITEM>> {
 	private boolean    mInterceptInfoWindowClicks;
 	private GoogleMap  map;
 	private List<ITEM> items;
+	private boolean    mConsumeMarkerClicks;
 
 	public BaseMarkerDrawer(IMarkerFormatter<ITEM> formatter) {
 		this.formatter = formatter;
@@ -186,7 +187,7 @@ public abstract class BaseMarkerDrawer<KEY, ITEM> implements INext<List<ITEM>> {
 			ITEM item = itemFromMarker(marker);
 			if (item != null && markerClickListener != null) {
 				markerClickListener.onItemMarkerClicked(item);
-				return true;
+				return mConsumeMarkerClicks;
 			}
 		}
 		return false;
@@ -207,6 +208,10 @@ public abstract class BaseMarkerDrawer<KEY, ITEM> implements INext<List<ITEM>> {
 
 	public void setInterceptMarkerClicks(boolean interceptItemClicks) {
 		this.mInterceptMarkerClicks = interceptItemClicks;
+	}
+
+	public void setConsumeMarkerClicks(boolean consumeItemClicks) {
+		this.mConsumeMarkerClicks = consumeItemClicks;
 	}
 
 

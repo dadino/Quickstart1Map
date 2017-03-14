@@ -1,16 +1,22 @@
 package com.dadino.quickstart.map;
 
 
-public abstract class GeoItem<GEO, ITEM> {
+public class GeoItem<GEO, ITEM> {
 
 	private final ITEM    item;
 	private final GEO     geometry;
 	private       float   scale;
 	private       boolean managed;
 
-	protected GeoItem(ITEM item, GEO geometry) {
+	public GeoItem(ITEM item, GEO geometry) {
 		this.item = item;
 		this.geometry = geometry;
+	}
+
+	public GeoItem(ITEM item, GEO geometry, float scale) {
+		this.item = item;
+		this.geometry = geometry;
+		this.scale = scale;
 	}
 
 	public ITEM getItem() {

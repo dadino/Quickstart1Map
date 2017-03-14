@@ -11,6 +11,11 @@ public abstract class BaseMarkerDrawer<KEY, ITEM> extends BaseGeoDrawer<KEY, Mar
 	}
 
 	@Override
+	protected void onMapBoundsUpdated() {
+
+	}
+
+	@Override
 	protected LatLng getPosition(GeoItem<Marker, ITEM> value) {
 		return value.getGeometry()
 		            .getPosition();

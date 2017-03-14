@@ -31,7 +31,6 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 	private OnSearchFromMapListener           searchListener;
 	private OnGeoClickedListener<GEO, ITEM>   geoClickListener;
 	private OnInfoWindowClickedListener<ITEM> infoWindowClickListener;
-	//Maps
 	private Map<KEY, GeoItem<GEO, ITEM>> mapItemGeo = new GeoItemMap<>();
 
 	//Varius
@@ -61,7 +60,7 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 
 	@Override
 	public void onItemNext(List<ITEM> items) {
-		Logs.ui(itemClassName() + " loaded: " + items.size());
+		log(itemClassName() + " loaded: " + items.size());
 		if (map == null) {
 			this.items = items;
 		} else drawGeos(items);
@@ -70,11 +69,27 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 	private void drawGeos(@NonNull List<ITEM> items) {
 		if (map == null) return;
 
-		Logs.ui("Drawing " + items.size() + " " + geoClassName() + " for " + itemClassName());
-		this.items = null;
+		setItems(items);
 
-		if (items.isEmpty()) {
+		if (!removeAllIfEmpty()) {
+			removeItemsInternal();
+			editItemsInternal();
+			addItemsInternal();
+		}
+		updateMapBounds();
+	}
 
+	protected void log(String message) {
+		Logs.ui(message);
+	}
+
+	protected void setItems(@NonNull List<ITEM> items) {
+		log("Drawing " + items.size() + " " + geoClassName() + " for " + itemClassName());
+		this.items = items;
+	}
+
+	private boolean removeAllIfEmpty() {
+		if (items == null || items.isEmpty()) {
 			long removeDelay = 0;
 			final long removeDelayStep = mapItemGeo.entrySet()
 			                                       .size() > 0 ? Math.min(
@@ -85,14 +100,14 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 				removeDelay += removeDelayStep;
 			}
 			mapItemGeo.clear();
-			Logs.ui("Removed all " + geoClassName() + " for " + itemClassName());
+			log("Removed all " + geoClassName() + " for " + itemClassName());
 
-			return;
-		}
+			return true;
+		} else return false;
+	}
 
+	protected List<ITEM> removeItemsInternal() {
 		List<ITEM> itemsToRemove = new ArrayList<>();
-		List<ITEM> itemsToChange = new ArrayList<>();
-		List<ITEM> itemsToAdd = new ArrayList<>();
 
 		//Remove unneeded items
 		for (Map.Entry<KEY, GeoItem<GEO, ITEM>> entry : mapItemGeo.entrySet()) {
@@ -117,6 +132,13 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 			removeDelay += removeDelayStep;
 		}
 
+		log(itemClassName() + " -> " + geoClassName() + " to remove: " + itemsToRemove.size());
+		return itemsToRemove;
+	}
+
+	protected List<ITEM> editItemsInternal() {
+		List<ITEM> itemsToChange = new ArrayList<>();
+
 		//Edit changed items
 		for (Map.Entry<KEY, GeoItem<GEO, ITEM>> entry : mapItemGeo.entrySet()) {
 			final ITEM key = entry.getValue()
@@ -133,9 +155,14 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 		for (ITEM item : itemsToChange) {
 			final GeoItem<GEO, ITEM> oldGeoItem = mapItemGeo.get(getId(item));
 			final GeoItem<GEO, ITEM> newGeoItem = formatter.editGeo(oldGeoItem, item);
-			;
 			mapItemGeo.put(getId(item), newGeoItem);
 		}
+		log(itemClassName() + " -> " + geoClassName() + " to change: " + itemsToChange.size());
+		return itemsToChange;
+	}
+
+	protected List<ITEM> addItemsInternal() {
+		List<ITEM> itemsToAdd = new ArrayList<>();
 
 		//Add new items
 		for (ITEM item : items) {
@@ -159,11 +186,8 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 			formatter.animateGeoEnter(markedItem, delay);
 			delay += delayStep;
 		}
-		Logs.ui(itemClassName() + " -> " + geoClassName() + " to remove: " + itemsToRemove.size());
-		Logs.ui(itemClassName() + " -> " + geoClassName() + " to change: " + itemsToChange.size());
-		Logs.ui(itemClassName() + " -> " + geoClassName() + " to add: " + itemsToAdd.size());
-
-		updateMapBounds();
+		log(itemClassName() + " -> " + geoClassName() + " to add: " + itemsToAdd.size());
+		return itemsToAdd;
 	}
 
 	public void updateMapBounds() {
@@ -235,12 +259,12 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 
 	public void onGeoLoadRequested(float zoom) {
 		if (zoom >= getMinumumZoomToSearch()) {
-			Logs.ui("Loading " + geoClassName() + " for " + itemClassName() + " at zoom " + zoom +
-			        ": true");
+			log("Loading " + geoClassName() + " for " + itemClassName() + " at zoom " + zoom +
+			    ": true");
 			if (searchListener != null) searchListener.onSearchRequested();
 		} else {
-			Logs.ui("Loading " + geoClassName() + " for " + itemClassName() + " at zoom " + zoom +
-			        ": false");
+			log("Loading " + geoClassName() + " for " + itemClassName() + " at zoom " + zoom +
+			    ": false");
 			if (searchListener != null) searchListener.onTooFarToSee();
 		}
 
@@ -322,6 +346,7 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 	protected abstract boolean needEdit(ITEM oldItem, ITEM newItem);
 	protected abstract String itemClassName();
 	protected abstract String geoClassName();
+
 
 	public LatLngBounds getMapBounds() {
 		return mMapBounds;

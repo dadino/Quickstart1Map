@@ -1,12 +1,9 @@
-package com.dadino.quickstart.map.mapcontrollers;
+package com.dadino.quickstart.map;
 
 
 import android.content.Context;
 import android.os.Bundle;
 
-import com.dadino.quickstart.map.R;
-import com.dadino.quickstart.map.markerdrawers.BaseMarkerDrawer;
-import com.dadino.quickstart.map.polylinedrawers.BasePolylineDrawer;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -39,8 +36,7 @@ public abstract class BaseMapController {
 	private int     mapPaddingTop;
 	private int     mapPaddingBottom;
 
-	private List<BaseMarkerDrawer>   markerDrawers   = new ArrayList<>();
-	private List<BasePolylineDrawer> polylineDrawers = new ArrayList<>();
+	private List<BaseGeoDrawer> drawers = new ArrayList<>();
 
 	public BaseMapController(Context context) {
 		this.mAppContext = context.getApplicationContext();
@@ -74,13 +70,10 @@ public abstract class BaseMapController {
 		                    });
 	}
 
-	public void addMarkerDrawer(BaseMarkerDrawer markerController) {
-		markerDrawers.add(markerController);
+	public void addGeoDrawer(BaseMarkerDrawer markerController) {
+		drawers.add(markerController);
 	}
 
-	public void addPolylineDrawer(BasePolylineDrawer polylineDrawer) {
-		polylineDrawers.add(polylineDrawer);
-	}
 
 	public void onMapReady(GoogleMap googleMap, Bundle savedInstanceState) {
 		map = googleMap;
@@ -116,10 +109,7 @@ public abstract class BaseMapController {
 		setInitialPosition(savedInstanceState);
 		onBoundsChanged();
 
-		for (BaseMarkerDrawer drawer : markerDrawers) {
-			drawer.setMap(map);
-		}
-		for (BasePolylineDrawer drawer : polylineDrawers) {
+		for (BaseGeoDrawer drawer : drawers) {
 			drawer.setMap(map);
 		}
 	}
@@ -153,37 +143,33 @@ public abstract class BaseMapController {
 	}
 
 	private boolean onMarkerClicked(Marker marker) {
-		for (BaseMarkerDrawer controller : markerDrawers) {
-			if (controller.onMarkerClicked(marker)) return true;
+		for (BaseGeoDrawer controller : drawers) {
+			if (controller.onGeoClicked(marker)) return true;
 		}
 		return false;
 	}
 
 	private boolean onInfoWindowClicked(Marker marker) {
-		for (BaseMarkerDrawer controller : markerDrawers) {
+		for (BaseGeoDrawer controller : drawers) {
 			if (controller.onInfoWindowClicked(marker)) return true;
 		}
 		return false;
 	}
 
 	private boolean onPolylineClicked(Polyline polyline) {
-		for (BasePolylineDrawer controller : polylineDrawers) {
-			if (controller.onPolylineClicked(polyline)) return true;
+		for (BaseGeoDrawer controller : drawers) {
+			if (controller.onGeoClicked(polyline)) return true;
 		}
 		return false;
 	}
-
 
 	private void onBoundsChanged() {
 		cameraMoveObservable.onNext(map.getCameraPosition().zoom);
 	}
 
 	private void onItemsLoadRequested(float zoom) {
-		for (BaseMarkerDrawer controller : markerDrawers) {
-			controller.onMarkerLoadRequested(zoom);
-		}
-		for (BasePolylineDrawer controller : polylineDrawers) {
-			controller.onPolylineLoadRequested(zoom);
+		for (BaseGeoDrawer controller : drawers) {
+			controller.onGeoLoadRequested(zoom);
 		}
 	}
 
@@ -203,14 +189,7 @@ public abstract class BaseMapController {
 
 	public void moveToDrawerBounds() {
 		LatLngBounds.Builder builder = LatLngBounds.builder();
-		for (BaseMarkerDrawer controller : markerDrawers) {
-			final LatLngBounds bounds = controller.getBounds();
-			if (bounds != null) {
-				builder.include(bounds.northeast);
-				builder.include(bounds.southwest);
-			}
-		}
-		for (BasePolylineDrawer controller : polylineDrawers) {
+		for (BaseGeoDrawer controller : drawers) {
 			final LatLngBounds bounds = controller.getBounds();
 			if (bounds != null) {
 				builder.include(bounds.northeast);

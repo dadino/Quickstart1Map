@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
@@ -23,12 +24,13 @@ import rx.subjects.BehaviorSubject;
 
 public abstract class BaseMapController {
 
-	protected final Context   mAppContext;
-	private final   int       mMapPadding;
-	private final   LatLng    mInitialPosition;
-	private final   float     mInitialZoom;
+	protected final Context      mAppContext;
+	private final   int          mMapPadding;
+	private final   LatLng       mInitialPosition;
+	private final   float        mInitialZoom;
+	private final   Subscription mSub;
 	//Varius
-	protected       GoogleMap map;
+	protected       GoogleMap    mMap;
 	private BehaviorSubject<Float> cameraMoveObservable = BehaviorSubject.create();
 	private boolean mLocationPermissionGranted;
 	private int     mapPaddingLeft;
@@ -44,14 +46,14 @@ public abstract class BaseMapController {
 		                     .getDimensionPixelSize(R.dimen._16dp);
 		mInitialPosition = null;
 		mInitialZoom = 0;
-		cameraMoveObservable.debounce(50, TimeUnit.MILLISECONDS)
-		                    .observeOn(AndroidSchedulers.mainThread())
-		                    .subscribe(new Action1<Float>() {
-			                    @Override
-			                    public void call(Float zoom) {
-				                    onItemsLoadRequested(zoom);
-			                    }
-		                    });
+		mSub = cameraMoveObservable.debounce(50, TimeUnit.MILLISECONDS)
+		                           .observeOn(AndroidSchedulers.mainThread())
+		                           .subscribe(new Action1<Float>() {
+			                           @Override
+			                           public void call(Float zoom) {
+				                           onItemsLoadRequested(zoom);
+			                           }
+		                           });
 	}
 
 	public BaseMapController(Context context, LatLng initialPosition, float initialZoom) {
@@ -60,14 +62,14 @@ public abstract class BaseMapController {
 		                     .getDimensionPixelSize(R.dimen._16dp);
 		mInitialPosition = initialPosition;
 		mInitialZoom = initialZoom;
-		cameraMoveObservable.debounce(50, TimeUnit.MILLISECONDS)
-		                    .observeOn(AndroidSchedulers.mainThread())
-		                    .subscribe(new Action1<Float>() {
-			                    @Override
-			                    public void call(Float zoom) {
-				                    onItemsLoadRequested(zoom);
-			                    }
-		                    });
+		mSub = cameraMoveObservable.debounce(50, TimeUnit.MILLISECONDS)
+		                           .observeOn(AndroidSchedulers.mainThread())
+		                           .subscribe(new Action1<Float>() {
+			                           @Override
+			                           public void call(Float zoom) {
+				                           onItemsLoadRequested(zoom);
+			                           }
+		                           });
 	}
 
 	public void addGeoDrawer(BaseGeoDrawer drawer) {
@@ -76,41 +78,41 @@ public abstract class BaseMapController {
 
 
 	public void onMapReady(GoogleMap googleMap, Bundle savedInstanceState) {
-		map = googleMap;
+		mMap = googleMap;
 		setMapUi();
 
-		map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+		mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 			@Override
 			public boolean onMarkerClick(Marker marker) {
 				return onMarkerClicked(marker);
 			}
 		});
-		map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+		mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
 			@Override
 			public void onInfoWindowClick(Marker marker) {
 				onInfoWindowClicked(marker);
 			}
 		});
-		map.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+		mMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
 			@Override
 			public void onPolylineClick(Polyline polyline) {
 				onPolylineClicked(polyline);
 			}
 		});
-		map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+		mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
 			@Override
 			public void onCameraMove() {
 				onBoundsChanged();
 			}
 		});
-		map.setPadding(mapPaddingLeft, mapPaddingTop, mapPaddingRight, mapPaddingBottom);
+		mMap.setPadding(mapPaddingLeft, mapPaddingTop, mapPaddingRight, mapPaddingBottom);
 
 		updateMyLocationButton();
 		setInitialPosition(savedInstanceState);
 		onBoundsChanged();
 
 		for (BaseGeoDrawer drawer : drawers) {
-			drawer.setMap(map);
+			drawer.setMap(mMap);
 		}
 	}
 
@@ -124,7 +126,7 @@ public abstract class BaseMapController {
 			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
 					mInitialPosition == null ? getDefaultPosition() : mInitialPosition,
 					mInitialPosition == null ? getDefaultZoom() : mInitialZoom);
-			map.moveCamera(cameraUpdate);
+			mMap.moveCamera(cameraUpdate);
 		}
 	}
 
@@ -135,10 +137,10 @@ public abstract class BaseMapController {
 
 	@SuppressWarnings("MissingPermission")
 	private void updateMyLocationButton() {
-		if (mLocationPermissionGranted && map != null) {
-			map.setMyLocationEnabled(true);
-			map.getUiSettings()
-			   .setMyLocationButtonEnabled(true);
+		if (mLocationPermissionGranted && mMap != null) {
+			mMap.setMyLocationEnabled(true);
+			mMap.getUiSettings()
+			    .setMyLocationButtonEnabled(true);
 		}
 	}
 
@@ -164,7 +166,7 @@ public abstract class BaseMapController {
 	}
 
 	private void onBoundsChanged() {
-		cameraMoveObservable.onNext(map.getCameraPosition().zoom);
+		cameraMoveObservable.onNext(mMap.getCameraPosition().zoom);
 	}
 
 	private void onItemsLoadRequested(float zoom) {
@@ -184,7 +186,7 @@ public abstract class BaseMapController {
 		this.mapPaddingRight = right;
 		this.mapPaddingTop = top;
 		this.mapPaddingBottom = bottom;
-		if (map != null) map.setPadding(left, top, right, bottom);
+		if (mMap != null) mMap.setPadding(left, top, right, bottom);
 	}
 
 	public void moveToDrawerBounds() {
@@ -197,14 +199,28 @@ public abstract class BaseMapController {
 			}
 		}
 		try {
-			map.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), mMapPadding));
+			mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), mMapPadding));
 		} catch (IllegalStateException ex) {
 			ex.printStackTrace();
 		}
 	}
 
 	public LatLngBounds getMapBounds() {
-		return map.getProjection()
-		          .getVisibleRegion().latLngBounds;
+		return mMap.getProjection()
+		           .getVisibleRegion().latLngBounds;
+	}
+
+	public void onDestroy() {
+		try {
+			//noinspection MissingPermission
+			mMap.setMyLocationEnabled(false);
+		} catch (Exception ignored) {
+		}
+		mMap = null;
+		for (BaseGeoDrawer drawer : drawers) {
+			drawer.onDestroy();
+		}
+		drawers.clear();
+		if (mSub != null && !mSub.isUnsubscribed()) mSub.unsubscribe();
 	}
 }

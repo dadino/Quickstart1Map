@@ -351,4 +351,13 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 	public LatLngBounds getMapBounds() {
 		return mMapBounds;
 	}
+
+	public void onDestroy() {
+		searchListener = null;
+		geoClickListener = null;
+		infoWindowClickListener = null;
+		mapItemGeo.clear();
+		items = null;
+		map = null;
+	}
 }

@@ -11,4 +11,16 @@ public abstract class BasePolygonFormatter<ITEM> extends BaseGeoFormatter<Polygo
 	public BasePolygonFormatter(Context context) {
 		super(context);
 	}
+
+
+	@Override
+	public GeoItem<Polygon, ITEM> editGeo(GeoItem<Polygon, ITEM> oldGeoItem, ITEM newItem) {
+		GeoItem<Polygon, ITEM> newGeoItem = new GeoItem<>(oldGeoItem, newItem);
+
+		updatePolygon(newGeoItem);
+
+		return newGeoItem;
+	}
+
+	protected abstract void updatePolygon(GeoItem<Polygon, ITEM> geoItem);
 }

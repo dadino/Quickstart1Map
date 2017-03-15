@@ -181,7 +181,7 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 		final long delayStep = itemsToAdd.size() > 0 ? Math.min(
 				MAXIMUM_TOTAL_TIME_FOR_ANIMATION / itemsToAdd.size(), MAXIMUM_DELAY) : 0;
 		for (ITEM item : itemsToAdd) {
-			final GeoItem<GEO, ITEM> markedItem = formatter.newGeo(map, item);
+			final GeoItem<GEO, ITEM> markedItem = formatter.newGeo(item);
 			mapItemGeo.put(getId(item), markedItem);
 			formatter.animateGeoEnter(markedItem, delay);
 			delay += delayStep;
@@ -329,7 +329,7 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 
 	public void setMap(GoogleMap map) {
 		this.map = map;
-		formatter.onMapReady();
+		formatter.onMapReady(this.map);
 		if (items != null) onItemNext(items);
 	}
 

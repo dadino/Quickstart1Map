@@ -70,8 +70,8 @@ public abstract class BaseMapController {
 		                    });
 	}
 
-	public void addGeoDrawer(BaseMarkerDrawer markerController) {
-		drawers.add(markerController);
+	public void addGeoDrawer(BaseGeoDrawer drawer) {
+		drawers.add(drawer);
 	}
 
 

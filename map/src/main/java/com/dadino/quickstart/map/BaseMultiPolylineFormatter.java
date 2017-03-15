@@ -14,4 +14,14 @@ public abstract class BaseMultiPolylineFormatter<ITEM> extends BaseGeoFormatter<
 	public BaseMultiPolylineFormatter(Context context) {
 		super(context);
 	}
+
+	@Override
+	public GeoItem<List<Polyline>, ITEM> editGeo(GeoItem<List<Polyline>, ITEM> oldGeoItem,
+	                                             ITEM newItem) {
+		for (Polyline polyline : oldGeoItem.getGeometry()) {
+			polyline.remove();
+		}
+
+		return newGeo(newItem);
+	}
 }

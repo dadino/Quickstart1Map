@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 
 import com.dadino.quickstart.map.listeners.OnGeoExitAnimationFinishedListener;
 import com.dadino.quickstart.map.misc.Equal;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.Marker;
 
@@ -90,6 +89,9 @@ public class GeoDrawerTests {
 		Context context = Mockito.mock(Context.class);
 
 		BaseMarkerFormatter<TestObject> formatter = new BaseMarkerFormatter<TestObject>(context) {
+			@Override
+			protected void updateMarker(GeoItem<Marker, TestObject> item) {}
+
 			@NonNull
 			@Override
 			protected BitmapDescriptor getScaledBitmapDescriptor(GeoItem<Marker, TestObject>
@@ -105,20 +107,12 @@ public class GeoDrawerTests {
 			protected void actuallyAnimateGeoEnter(GeoItem<Marker, TestObject> geoItem,
 			                                       long delay) {}
 
-			@Override
-			public void onMapReady() {}
 
 			@Override
-			public GeoItem<Marker, TestObject> newGeo(@NonNull GoogleMap map,
-			                                          TestObject testObject) {
-				return new GeoItem<Marker, TestObject>(testObject, null);
+			public GeoItem<Marker, TestObject> newGeo(TestObject testObject) {
+				return new GeoItem<>((Marker) null, testObject);
 			}
 
-			@Override
-			public GeoItem<Marker, TestObject> editGeo(GeoItem<Marker, TestObject> oldGeoItem,
-			                                           TestObject newItem) {
-				return new GeoItem<Marker, TestObject>(newItem, oldGeoItem.getGeometry());
-			}
 
 			@Override
 			public void highlightGeo(GeoItem<Marker, TestObject> geoItem) {}

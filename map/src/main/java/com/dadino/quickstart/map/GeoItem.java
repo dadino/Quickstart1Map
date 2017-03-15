@@ -8,15 +8,22 @@ public class GeoItem<GEO, ITEM> {
 	private       float   scale;
 	private       boolean managed;
 
-	public GeoItem(ITEM item, GEO geometry) {
+	public GeoItem(GEO geometry, ITEM item) {
 		this.item = item;
 		this.geometry = geometry;
 	}
 
-	public GeoItem(ITEM item, GEO geometry, float scale) {
+	public GeoItem(GEO geometry, ITEM item, float scale) {
 		this.item = item;
 		this.geometry = geometry;
 		this.scale = scale;
+	}
+
+	public GeoItem(GeoItem<GEO, ITEM> source, ITEM newItem) {
+		this.item = newItem;
+		this.geometry = source.getGeometry();
+		this.scale = source.getScale();
+		this.managed = source.isManaged();
 	}
 
 	public ITEM getItem() {

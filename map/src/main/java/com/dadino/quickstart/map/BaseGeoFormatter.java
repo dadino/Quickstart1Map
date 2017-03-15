@@ -2,18 +2,27 @@ package com.dadino.quickstart.map;
 
 
 import android.content.Context;
+import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
 
 import com.dadino.quickstart.map.listeners.OnGeoExitAnimationFinishedListener;
+import com.google.android.gms.maps.GoogleMap;
 
 public abstract class BaseGeoFormatter<GEO, ITEM> implements IGeoFormatter<GEO, ITEM> {
 
-	protected final Context mAppContext;
-
-	private boolean mAnimateGeoEnter;
-	private boolean mAnimateGeoExit;
+	protected final Context   mAppContext;
+	protected       GoogleMap map;
+	private         boolean   mAnimateGeoEnter;
+	private         boolean   mAnimateGeoExit;
 
 	public BaseGeoFormatter(Context context) {
 		mAppContext = context.getApplicationContext();
+	}
+
+	@Override
+	@CallSuper
+	public void onMapReady(@NonNull GoogleMap map) {
+		this.map = map;
 	}
 
 	@Override
@@ -33,6 +42,26 @@ public abstract class BaseGeoFormatter<GEO, ITEM> implements IGeoFormatter<GEO, 
 		}
 	}
 
+	@Override
+	public boolean getAnimateGeoEnter() {
+		return mAnimateGeoEnter;
+	}
+
+	@Override
+	public void setAnimateGeoEnter(boolean animateGeoEnter) {
+		this.mAnimateGeoEnter = animateGeoEnter;
+	}
+
+	@Override
+	public boolean getAnimateGeoExit() {
+		return mAnimateGeoExit;
+	}
+
+	@Override
+	public void setAnimateGeoExit(boolean animateMarkerExit) {
+		this.mAnimateGeoExit = animateMarkerExit;
+	}
+
 	protected abstract void actuallyAnimateGeoExit(GeoItem<GEO, ITEM> geoItem, long delay,
 	                                               OnGeoExitAnimationFinishedListener listener);
 
@@ -42,24 +71,4 @@ public abstract class BaseGeoFormatter<GEO, ITEM> implements IGeoFormatter<GEO, 
 	}
 
 	protected abstract void actuallyAnimateGeoEnter(GeoItem<GEO, ITEM> geoItem, long delay);
-
-	@Override
-	public void setAnimateGeoEnter(boolean animateGeoEnter) {
-		this.mAnimateGeoEnter = animateGeoEnter;
-	}
-
-	@Override
-	public void setAnimateGeoExit(boolean animateMarkerExit) {
-		this.mAnimateGeoExit = animateMarkerExit;
-	}
-
-	@Override
-	public boolean getAnimateGeoExit() {
-		return mAnimateGeoExit;
-	}
-
-	@Override
-	public boolean getAnimateGeoEnter() {
-		return mAnimateGeoEnter;
-	}
 }

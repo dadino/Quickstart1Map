@@ -8,9 +8,9 @@ import com.google.android.gms.maps.GoogleMap;
 
 public interface IGeoFormatter<GEO, ITEM> {
 
-	void onMapReady();
+	void onMapReady(@NonNull GoogleMap map);
 
-	GeoItem<GEO, ITEM> newGeo(@NonNull GoogleMap map, ITEM item);
+	GeoItem<GEO, ITEM> newGeo(ITEM item);
 	GeoItem<GEO, ITEM> editGeo(GeoItem<GEO, ITEM> oldGeoItem, ITEM newItem);
 
 	void animateGeoEnter(GeoItem<GEO, ITEM> geo, long delay);

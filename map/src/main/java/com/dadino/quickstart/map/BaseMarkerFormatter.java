@@ -46,6 +46,18 @@ public abstract class BaseMarkerFormatter<ITEM> extends BaseGeoFormatter<Marker,
 		super(context);
 	}
 
+
+	@Override
+	public GeoItem<Marker, ITEM> editGeo(GeoItem<Marker, ITEM> oldGeoItem, ITEM newItem) {
+		GeoItem<Marker, ITEM> newGeoItem = new GeoItem<>(oldGeoItem, newItem);
+
+		updateMarker(newGeoItem);
+
+		return newGeoItem;
+	}
+
+	protected abstract void updateMarker(GeoItem<Marker, ITEM> geoItem);
+
 	@NonNull
 	protected abstract BitmapDescriptor getScaledBitmapDescriptor(GeoItem<Marker, ITEM> object,
 	                                                              Float value);

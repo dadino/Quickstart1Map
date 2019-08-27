@@ -26,7 +26,7 @@ android {
         versionCode rootProject.versionCode
         versionName rootProject.versionName
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
     buildTypes {
@@ -46,13 +46,13 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:1.10.19'
 
     //QUICKSTART
-    implementation 'com.dadino.quickstart:core:0.5.0'
+    implementation 'com.dadino.quickstart:core:0.6.0'
 
     //PLAY SERVICES
-    implementation 'com.google.android.gms:play-services-maps:16.1.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
     //SUPPORT
-    implementation 'com.android.support:support-vector-drawable:28.0.0'
+    implementation 'androidx.vectordrawable:vectordrawable:1.0.1'
 
     //RxJava
     implementation 'io.reactivex:rxandroid:1.2.1'

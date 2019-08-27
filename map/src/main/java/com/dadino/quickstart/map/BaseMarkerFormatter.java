@@ -2,7 +2,7 @@ package com.dadino.quickstart.map;
 
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Property;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;

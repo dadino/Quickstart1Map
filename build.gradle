@@ -4,7 +4,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath 'guru.stefma.bintrayrelease:bintrayrelease:1.1.2'
     }
 }
@@ -26,7 +26,7 @@ task clean(type: Delete) {
 
 ext {
     compileSdk = 28
-    minSdk = 16
+    minSdk = 21
     targetSdk = 28
 
     userOrg = "dadino"
@@ -38,7 +38,7 @@ ext {
     bintrayKey = 'e23c567c5d38bdae821f0b74e855b07b37487762'
 
     versionCode = 2
-    versionName = "0.3.0"
+    versionName = "0.4.0"
 
     // ./gradlew clean build bintrayUpload -PdryRun=false
 }

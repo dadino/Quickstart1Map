@@ -2,8 +2,8 @@ package com.dadino.quickstart.map;
 
 
 import android.content.Context;
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
 
 import com.dadino.quickstart.map.listeners.OnGeoExitAnimationFinishedListener;
 import com.google.android.gms.maps.GoogleMap;

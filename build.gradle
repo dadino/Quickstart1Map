@@ -4,7 +4,11 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:4.1.0'
+
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+
         classpath 'guru.stefma.bintrayrelease:bintrayrelease:1.1.2'
     }
 }
@@ -14,7 +18,7 @@ allprojects {
         jcenter()
         google()
         maven {
-            url "http://dl.bintray.com/dadino/quickstart"
+            url "http://dl.bintray.com/dadino/quickstart.rxjava2"
         }
     }
 
@@ -30,8 +34,8 @@ ext {
     targetSdk = 28
 
     userOrg = "dadino"
-    repoName = "quickstart"
-    groupId = "com.dadino.quickstart"
+    repoName = "quickstart.rxjava2"
+    groupId = "com.dadino.quickstart.rxjava2"
     website = "https://github.com/dadino/basictoolbox"
     descr = "Basic toolbox to quickly start coding"
     bintrayUser = 'dadino'

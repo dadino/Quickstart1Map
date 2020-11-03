@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Quickstart1Map.iml" filepath="$PROJECT_DIR$/Quickstart1Map.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/map/map.iml" filepath="$PROJECT_DIR$/map/map.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Quickstart1Map.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Quickstart1Map.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/map/Quickstart1Map.map.iml" filepath="$PROJECT_DIR$/.idea/modules/map/Quickstart1Map.map.iml" />
     </modules>
   </component>
 </project>

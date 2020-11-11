@@ -3,6 +3,7 @@ package com.dadino.quickstart.map;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -11,15 +12,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
+import com.jakewharton.rxrelay2.BehaviorRelay;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.BackpressureStrategy;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.subjects.BehaviorSubject;
 
 
 public abstract class BaseMapController {
@@ -28,17 +30,17 @@ public abstract class BaseMapController {
     private final int mMapPadding;
     private final LatLng mInitialPosition;
     private final float mInitialZoom;
-    private final Disposable mSub;
-    //Varius
+    private final Disposable cameraMoveDisposable;
     protected GoogleMap mMap;
-    private BehaviorSubject<Float> cameraMoveObservable = BehaviorSubject.create();
+    private final BehaviorRelay<Float> cameraMoveRelay;
     private boolean mLocationPermissionGranted;
     private int mapPaddingLeft;
     private int mapPaddingRight;
     private int mapPaddingTop;
     private int mapPaddingBottom;
 
-    private List<BaseGeoDrawer> drawers = new ArrayList<>();
+    private final List<BaseGeoDrawer> drawers = new ArrayList<>();
+    private LatLngBounds mapBounds;
 
     public BaseMapController(Context context) {
         this.mAppContext = context.getApplicationContext();
@@ -46,28 +48,32 @@ public abstract class BaseMapController {
                 .getDimensionPixelSize(R.dimen._16dp);
         mInitialPosition = null;
         mInitialZoom = 0;
-        mSub = cameraMoveObservable.debounce(50, TimeUnit.MILLISECONDS)
+        cameraMoveRelay = BehaviorRelay.createDefault(mInitialZoom);
+        cameraMoveDisposable = cameraMoveRelay.toFlowable(BackpressureStrategy.LATEST)
+                .debounce(50, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Float>() {
                     @Override
-                    public void accept(Float zoom) throws Exception {
-                        onItemsLoadRequested(zoom);
+                    public void accept(Float zoom) {
+                        onCameraMoved();
                     }
                 });
     }
 
-    public BaseMapController(Context context, LatLng initialPosition, float initialZoom) {
+    public BaseMapController(Context context, LatLng initialPosition, float initialZoom, long cameraDebounceMillis) {
         this.mAppContext = context.getApplicationContext();
         mMapPadding = context.getResources()
                 .getDimensionPixelSize(R.dimen._16dp);
         mInitialPosition = initialPosition;
         mInitialZoom = initialZoom;
-        mSub = cameraMoveObservable.debounce(50, TimeUnit.MILLISECONDS)
+        cameraMoveRelay = BehaviorRelay.createDefault(mInitialZoom);
+        cameraMoveDisposable = cameraMoveRelay.toFlowable(BackpressureStrategy.LATEST)
+                .debounce(cameraDebounceMillis, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Float>() {
                     @Override
-                    public void accept(Float zoom) throws Exception {
-                        onItemsLoadRequested(zoom);
+                    public void accept(Float zoom) {
+                        onCameraMoved();
                     }
                 });
     }
@@ -102,14 +108,14 @@ public abstract class BaseMapController {
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
-                onBoundsChanged();
+                cameraMoveRelay.accept(mMap.getCameraPosition().zoom);
             }
         });
         mMap.setPadding(mapPaddingLeft, mapPaddingTop, mapPaddingRight, mapPaddingBottom);
 
         updateMyLocationButton();
         setInitialPosition(savedInstanceState);
-        onBoundsChanged();
+        onCameraMoved();
 
         for (BaseGeoDrawer drawer : drawers) {
             drawer.setMap(mMap);
@@ -165,13 +171,28 @@ public abstract class BaseMapController {
         return false;
     }
 
-    private void onBoundsChanged() {
-        cameraMoveObservable.onNext(mMap.getCameraPosition().zoom);
+    private void onCameraMoved() {
+        mapBounds = mMap.getProjection()
+                .getVisibleRegion()
+                .latLngBounds;
+        if (mapBounds.southwest.latitude == 0
+                && mapBounds.southwest.longitude == 0
+                && mapBounds.northeast.latitude == 0
+                && mapBounds.northeast.longitude == 0) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    onCameraMoved();
+                }
+            }, 16);
+        } else {
+            onItemsLoadRequested(mapBounds, mMap.getCameraPosition().zoom);
+        }
     }
 
-    private void onItemsLoadRequested(float zoom) {
+    private void onItemsLoadRequested(LatLngBounds bounds, float zoom) {
         for (BaseGeoDrawer controller : drawers) {
-            controller.onGeoLoadRequested(zoom);
+            controller.onMapProjectionBoundsChanged(bounds, zoom);
         }
     }
 
@@ -206,8 +227,7 @@ public abstract class BaseMapController {
     }
 
     public LatLngBounds getMapBounds() {
-        return mMap.getProjection()
-                .getVisibleRegion().latLngBounds;
+        return mapBounds;
     }
 
     public void onDestroy() {
@@ -221,6 +241,7 @@ public abstract class BaseMapController {
             drawer.onDestroy();
         }
         drawers.clear();
-        if (mSub != null && !mSub.isDisposed()) mSub.dispose();
+        if (cameraMoveDisposable != null && !cameraMoveDisposable.isDisposed())
+            cameraMoveDisposable.dispose();
     }
 }

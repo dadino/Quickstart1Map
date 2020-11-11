@@ -8,10 +8,12 @@ import android.os.Handler;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.VisibleRegion;
 import com.jakewharton.rxrelay2.BehaviorRelay;
 
 import java.util.ArrayList;
@@ -172,19 +174,30 @@ public abstract class BaseMapController {
     }
 
     private void onCameraMoved() {
-        mapBounds = mMap.getProjection()
-                .getVisibleRegion()
-                .latLngBounds;
-        if (mapBounds.southwest.latitude == 0
-                && mapBounds.southwest.longitude == 0
-                && mapBounds.northeast.latitude == 0
-                && mapBounds.northeast.longitude == 0) {
+        mapBounds = null;
+        if (mMap != null) {
+            final Projection projection = mMap.getProjection();
+            if (projection != null) {
+                final VisibleRegion region = projection.getVisibleRegion();
+                if (region != null) {
+                    final LatLngBounds latLngBounds = region.latLngBounds;
+                    if (latLngBounds != null) {
+                        mapBounds = latLngBounds;
+                    }
+                }
+            }
+        }
+        if (mapBounds == null ||
+                (mapBounds.southwest.latitude == 0
+                        && mapBounds.southwest.longitude == 0
+                        && mapBounds.northeast.latitude == 0
+                        && mapBounds.northeast.longitude == 0)) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     onCameraMoved();
                 }
-            }, 16);
+            }, 32);
         } else {
             onItemsLoadRequested(mapBounds, mMap.getCameraPosition().zoom);
         }

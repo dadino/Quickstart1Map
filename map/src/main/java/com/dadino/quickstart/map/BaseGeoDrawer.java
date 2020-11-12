@@ -1,11 +1,12 @@
 package com.dadino.quickstart.map;
 
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dadino.quickstart.core.interfaces.INext;
-import com.dadino.quickstart.core.utils.Logs;
 import com.dadino.quickstart.map.listeners.OnGeoClickedListener;
 import com.dadino.quickstart.map.listeners.OnGeoExitAnimationFinishedListener;
 import com.dadino.quickstart.map.listeners.OnInfoWindowClickedListener;
@@ -23,17 +24,16 @@ import java.util.Map;
 
 
 public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>> {
+    private static final String TAG = "GeoDrawer";
 
-    private static final int MAXIMUM_TOTAL_TIME_FOR_ANIMATION = 1000;
-    private static final int MAXIMUM_DELAY = 50;
+    private long maximumTotalTimeForAnimation = 1000;
+    private int maximumDelayForAnimation = 50;
     private final IGeoFormatter<GEO, ITEM> formatter;
     private final Class geoType = ((GEO) new Object()).getClass();
     private OnSearchFromMapListener searchListener;
     private OnGeoClickedListener<GEO, ITEM> geoClickListener;
     private OnInfoWindowClickedListener<ITEM> infoWindowClickListener;
     private Map<KEY, GeoItem<GEO, ITEM>> mapItemGeo = new GeoItemMap<>();
-
-    //Varius
     private boolean mInterceptGeoClicks;
     private boolean mInterceptInfoWindowClicks;
     private GoogleMap map;
@@ -44,6 +44,14 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 
     public BaseGeoDrawer(IGeoFormatter<GEO, ITEM> formatter) {
         this.formatter = formatter;
+    }
+
+    public void setMaximumTotalTimeForAnimation(long millis) {
+        this.maximumTotalTimeForAnimation = millis;
+    }
+
+    public void setMaximumDelayForAnimation(int millis) {
+        this.maximumDelayForAnimation = millis;
     }
 
     public void setSearchListener(OnSearchFromMapListener searchListener) {
@@ -60,7 +68,7 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 
     @Override
     public void onItemNext(List<ITEM> items) {
-        log(itemClassName() + " loaded: " + items.size());
+        Log.d(TAG, itemClassName() + " loaded: " + items.size());
         if (map == null) {
             this.items = items;
         } else drawGeos(items);
@@ -78,12 +86,8 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
         }
     }
 
-    protected void log(String message) {
-        Logs.ui(message);
-    }
-
     protected void setItems(@NonNull List<ITEM> items) {
-        log("Drawing " + items.size() + " " + geoClassName() + " for " + itemClassName());
+        Log.d(TAG, "Drawing " + items.size() + " " + geoClassName() + " for " + itemClassName());
         this.items = items;
     }
 
@@ -92,14 +96,14 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
             long removeDelay = 0;
             final long removeDelayStep = mapItemGeo.entrySet()
                     .size() > 0 ? Math.min(
-                    MAXIMUM_TOTAL_TIME_FOR_ANIMATION / mapItemGeo.entrySet()
-                            .size(), MAXIMUM_DELAY) : 0;
+                    maximumTotalTimeForAnimation / mapItemGeo.entrySet()
+                            .size(), maximumDelayForAnimation) : 0;
             for (Map.Entry<KEY, GeoItem<GEO, ITEM>> entry : mapItemGeo.entrySet()) {
                 removeGeoAnimated(removeDelay, entry.getValue());
                 removeDelay += removeDelayStep;
             }
             mapItemGeo.clear();
-            log("Removed all " + geoClassName() + " for " + itemClassName());
+            Log.d(TAG, "Removed all " + geoClassName() + " for " + itemClassName());
 
             return true;
         } else return false;
@@ -124,14 +128,14 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 
         long removeDelay = 0;
         final long removeDelayStep = itemsToRemove.size() > 0 ? Math.min(
-                MAXIMUM_TOTAL_TIME_FOR_ANIMATION / itemsToRemove.size(), MAXIMUM_DELAY) : 0;
+                maximumTotalTimeForAnimation / itemsToRemove.size(), maximumDelayForAnimation) : 0;
         for (ITEM item : itemsToRemove) {
             removeGeoAnimated(removeDelay, mapItemGeo.get(getId(item)));
             mapItemGeo.remove(getId(item));
             removeDelay += removeDelayStep;
         }
 
-        log(itemClassName() + " -> " + geoClassName() + " to remove: " + itemsToRemove.size());
+        Log.d(TAG, itemClassName() + " -> " + geoClassName() + " to remove: " + itemsToRemove.size());
         return itemsToRemove;
     }
 
@@ -156,7 +160,7 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
             final GeoItem<GEO, ITEM> newGeoItem = formatter.editGeo(oldGeoItem, item);
             mapItemGeo.put(getId(item), newGeoItem);
         }
-        log(itemClassName() + " -> " + geoClassName() + " to change: " + itemsToChange.size());
+        Log.d(TAG, itemClassName() + " -> " + geoClassName() + " to change: " + itemsToChange.size());
         return itemsToChange;
     }
 
@@ -178,22 +182,20 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
         }
         long delay = 0;
         final long delayStep = itemsToAdd.size() > 0 ? Math.min(
-                MAXIMUM_TOTAL_TIME_FOR_ANIMATION / itemsToAdd.size(), MAXIMUM_DELAY) : 0;
+                maximumTotalTimeForAnimation / itemsToAdd.size(), maximumDelayForAnimation) : 0;
         for (ITEM item : itemsToAdd) {
             final GeoItem<GEO, ITEM> markedItem = formatter.newGeo(item);
             mapItemGeo.put(getId(item), markedItem);
             formatter.animateGeoEnter(markedItem, delay);
             delay += delayStep;
         }
-        log(itemClassName() + " -> " + geoClassName() + " to add: " + itemsToAdd.size());
+        Log.d(TAG, itemClassName() + " -> " + geoClassName() + " to add: " + itemsToAdd.size());
         return itemsToAdd;
     }
 
     public void updateMapBounds(LatLngBounds bounds) {
-        if (getMap() != null) {
-            this.mMapProjectionBounds = bounds;
-            onMapBoundsUpdated();
-        }
+        this.mMapProjectionBounds = bounds;
+        onMapBoundsUpdated();
     }
 
     protected abstract void onMapBoundsUpdated();
@@ -257,12 +259,10 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
 
     public void onMapProjectionBoundsChanged(LatLngBounds bounds, float zoom) {
         if (zoom >= getMinumumZoomToSearch()) {
-            log("Loading " + geoClassName() + " for " + itemClassName() + " at zoom " + zoom +
-                    ": true");
+            Log.d(TAG, "Loading " + geoClassName() + " for " + itemClassName() + "-> zoom: " + zoom + "; bounds: (ne: " + bounds.northeast.latitude + "," + bounds.northeast.longitude + "; sw: " + bounds.southwest.latitude + "," + bounds.southwest.longitude + ")");
             if (searchListener != null) searchListener.onSearchRequested(bounds);
         } else {
-            log("Loading " + geoClassName() + " for " + itemClassName() + " at zoom " + zoom +
-                    ": false");
+            Log.d(TAG, "NOT loading " + geoClassName() + " for " + itemClassName() + "-> zoom: " + zoom + "; bounds: (ne: " + bounds.northeast.latitude + "," + bounds.northeast.longitude + "; sw: " + bounds.southwest.latitude + "," + bounds.southwest.longitude + ")");
             if (searchListener != null) searchListener.onTooFarToSee();
         }
 
@@ -305,6 +305,21 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
         }
 
         this.mSelectedItem = mapItemGeo.get(getId(item));
+
+        if (mSelectedItem != null && mSelectedItem.isManaged()) {
+            highlightGeo(mSelectedItem);
+            showInfoWindow(mSelectedItem);
+            map.animateCamera(CameraUpdateFactory.newLatLng(getPosition(mSelectedItem)));
+        }
+    }
+
+    public void setSelectedKey(KEY key) {
+        if (mSelectedItem != null && mSelectedItem.isManaged()) {
+            unhighlightGeo(mSelectedItem);
+            hideInfoWindow(mSelectedItem);
+        }
+
+        this.mSelectedItem = mapItemGeo.get(key);
 
         if (mSelectedItem != null && mSelectedItem.isManaged()) {
             highlightGeo(mSelectedItem);

@@ -9,6 +9,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -128,7 +129,6 @@ public abstract class BaseMapController {
 
     public abstract float getDefaultZoom();
 
-
     private void setInitialPosition(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
@@ -139,9 +139,8 @@ public abstract class BaseMapController {
     }
 
     protected LatLng getDefaultPosition() {
-        return new LatLng(37.6689742, 13.4464143);
+        return new LatLng(43.142351, 13.078629);
     }
-
 
     @SuppressWarnings("MissingPermission")
     private void updateMyLocationButton() {
@@ -175,7 +174,11 @@ public abstract class BaseMapController {
 
     private void onCameraMoved() {
         mapBounds = null;
+        float zoom = mInitialZoom;
         if (mMap != null) {
+            CameraPosition cameraPosition = mMap.getCameraPosition();
+            if (cameraPosition != null) zoom = cameraPosition.zoom;
+
             final Projection projection = mMap.getProjection();
             if (projection != null) {
                 final VisibleRegion region = projection.getVisibleRegion();
@@ -199,11 +202,11 @@ public abstract class BaseMapController {
                 }
             }, 32);
         } else {
-            onItemsLoadRequested(mapBounds, mMap.getCameraPosition().zoom);
+            onMapProjectionChanged(mapBounds, zoom);
         }
     }
 
-    private void onItemsLoadRequested(LatLngBounds bounds, float zoom) {
+    private void onMapProjectionChanged(LatLngBounds bounds, float zoom) {
         for (BaseGeoDrawer controller : drawers) {
             controller.onMapProjectionBoundsChanged(bounds, zoom);
         }

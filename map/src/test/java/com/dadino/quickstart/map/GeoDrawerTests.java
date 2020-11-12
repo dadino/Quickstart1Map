@@ -152,9 +152,6 @@ public class GeoDrawerTests {
 
 	@Test
 	public void cicle() {
-		doNothing().when(drawer)
-		           .log(anyString());
-
 		advanceToStep(step0, 0, 0, 0, 0);
 		advanceToStep(step1, 0, 0, 17, 17);
 		advanceToStep(step2, 1, 3, 1, 17);

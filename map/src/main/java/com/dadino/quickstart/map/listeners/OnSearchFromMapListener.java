@@ -5,6 +5,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 
 public interface OnSearchFromMapListener {
 
-	void onTooFarToSee();
-	void onSearchRequested(LatLngBounds bounds);
+    void onTooFarToSee(float zoom, LatLngBounds bounds);
+
+    void onSearchRequested(float zoom, LatLngBounds bounds);
 }

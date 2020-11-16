@@ -260,10 +260,10 @@ public abstract class BaseGeoDrawer<KEY, GEO, ITEM> implements INext<List<ITEM>>
     public void onMapProjectionBoundsChanged(LatLngBounds bounds, float zoom) {
         if (zoom >= getMinumumZoomToSearch()) {
             Log.d(TAG, "Loading " + geoClassName() + " for " + itemClassName() + "-> zoom: " + zoom + "; bounds: (ne: " + bounds.northeast.latitude + "," + bounds.northeast.longitude + "; sw: " + bounds.southwest.latitude + "," + bounds.southwest.longitude + ")");
-            if (searchListener != null) searchListener.onSearchRequested(bounds);
+            if (searchListener != null) searchListener.onSearchRequested(zoom, bounds);
         } else {
             Log.d(TAG, "NOT loading " + geoClassName() + " for " + itemClassName() + "-> zoom: " + zoom + "; bounds: (ne: " + bounds.northeast.latitude + "," + bounds.northeast.longitude + "; sw: " + bounds.southwest.latitude + "," + bounds.southwest.longitude + ")");
-            if (searchListener != null) searchListener.onTooFarToSee();
+            if (searchListener != null) searchListener.onTooFarToSee(zoom, bounds);
         }
 
         updateMapBounds(bounds);

@@ -226,6 +226,26 @@ public abstract class BaseMapController {
         if (mMap != null) mMap.setPadding(left, top, right, bottom);
     }
 
+    public void setMapBorderLeft(int left) {
+        this.mapPaddingLeft = left;
+        if (mMap != null) mMap.setPadding(left, mapPaddingTop, mapPaddingRight, mapPaddingBottom);
+    }
+
+    public void setMapBorderRight(int right) {
+        this.mapPaddingRight = right;
+        if (mMap != null) mMap.setPadding(mapPaddingLeft, mapPaddingTop, right, mapPaddingBottom);
+    }
+
+    public void setMapBorderTop(int top) {
+        this.mapPaddingTop = top;
+        if (mMap != null) mMap.setPadding(mapPaddingLeft, top, mapPaddingRight, mapPaddingBottom);
+    }
+
+    public void setMapBorderBottom(int bottom) {
+        this.mapPaddingBottom = bottom;
+        if (mMap != null) mMap.setPadding(mapPaddingLeft, mapPaddingTop, mapPaddingRight, bottom);
+    }
+
     public void moveToDrawerBounds() {
         LatLngBounds.Builder builder = LatLngBounds.builder();
         for (BaseGeoDrawer controller : drawers) {

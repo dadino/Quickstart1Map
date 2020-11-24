@@ -41,8 +41,8 @@ ext {
     bintrayUser = 'dadino'
     bintrayKey = 'e23c567c5d38bdae821f0b74e855b07b37487762'
 
-    versionCode = 7
-    versionName = "0.4.5"
+    versionCode = 8
+    versionName = "0.4.6"
 
     // ./gradlew clean build bintrayUpload -PdryRun=false
 }

@@ -1,21 +1,13 @@
 apply plugin: 'com.android.library'
-apply plugin: "guru.stefma.bintrayrelease"
 
-version = rootProject.versionName
-group = rootProject.groupId
-
-androidArtifact {
-    artifactId = "map"
+ext {
+    PUBLISH_GROUP_ID = rootProject.groupId
+    PUBLISH_VERSION = rootProject.versionName
+    PUBLISH_ARTIFACT_ID = rootProject.artifactId
 }
 
-publish {
-    userOrg = rootProject.userOrg
-    repoName = rootProject.repoName
-    desc = rootProject.descr
-    website = rootProject.website
-    bintrayUser = rootProject.bintrayUser
-    bintrayKey = rootProject.bintrayKey
-}
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"
+
 
 android {
     compileSdkVersion rootProject.compileSdk
@@ -46,7 +38,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:1.10.19'
 
     //QUICKSTART
-    implementation 'com.dadino.quickstart:core:0.6.0'
+    implementation 'io.github.dadino:quickstart-core:0.6.2'
 
     //PLAY SERVICES
     implementation 'com.google.android.gms:play-services-maps:17.0.0'

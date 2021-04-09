@@ -1,11 +1,15 @@
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
 buildscript {
     repositories {
         jcenter()
+        maven { url 'https://plugins.gradle.org/m2/' }
+
         google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.0'
-        classpath 'guru.stefma.bintrayrelease:bintrayrelease:1.1.2'
+        classpath "io.github.gradle-nexus:publish-plugin:1.0.0"
     }
 }
 
@@ -13,9 +17,7 @@ allprojects {
     repositories {
         jcenter()
         google()
-        maven {
-            url "http://dl.bintray.com/dadino/quickstart"
-        }
+        mavenCentral()
     }
 
 }
@@ -29,16 +31,22 @@ ext {
     minSdk = 21
     targetSdk = 28
 
-    userOrg = "dadino"
-    repoName = "quickstart"
-    groupId = "com.dadino.quickstart"
-    website = "https://github.com/dadino/basictoolbox"
-    descr = "Basic toolbox to quickly start coding"
-    bintrayUser = 'dadino'
-    bintrayKey = 'e23c567c5d38bdae821f0b74e855b07b37487762'
+    groupId = "io.github.dadino"
+    artifactId = "quickstart-map"
 
     versionCode = 2
     versionName = "0.4.0"
 
+    ossrhUsername = System.properties['ossrhUsername']
+    ossrhPassword = System.properties['ossrhPassword']
+    sonatypeStagingProfileId = System.properties['sonatypeStagingProfileId']
+
     // ./gradlew clean build bintrayUpload -PdryRun=false
+}
+
+if (hasProperty('buildScan')) {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
 }

@@ -1,30 +1,19 @@
 apply plugin: 'com.android.library'
-apply plugin: "guru.stefma.bintrayrelease"
 
-version = rootProject.versionName
-group = rootProject.groupId
-
-androidArtifact {
-    artifactId = "map"
+ext {
+    PUBLISH_GROUP_ID = rootProject.groupId
+    PUBLISH_VERSION = rootProject.versionName
+    PUBLISH_ARTIFACT_ID = rootProject.artifactId
 }
 
-publish {
-    userOrg = rootProject.userOrg
-    repoName = rootProject.repoName
-    desc = rootProject.descr
-    website = rootProject.website
-    bintrayUser = rootProject.bintrayUser
-    bintrayKey = rootProject.bintrayKey
-}
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"
 
 android {
-    compileSdkVersion rootProject.compileSdk
+    compileSdk rootProject.compileSdk
 
     defaultConfig {
-        minSdkVersion rootProject.minSdk
-        targetSdkVersion rootProject.targetSdk
-        versionCode rootProject.versionCode
-        versionName rootProject.versionName
+        minSdk rootProject.minSdk
+        targetSdk rootProject.targetSdk
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -36,20 +25,25 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
     dexOptions {
         javaMaxHeapSize "4g"
     }
+    namespace 'com.dadino.quickstart.map'
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:1.10.19'
 
     //QUICKSTART
-    implementation 'com.dadino.quickstart.rxjava2:core:0.6.11'
+    implementation 'io.github.dadino:quickstart-rxjava2-core:0.7.0'
 
     //PLAY SERVICES
-    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
 
     //SUPPORT
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'

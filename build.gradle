@@ -1,48 +1,45 @@
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
 buildscript {
     repositories {
-        jcenter()
+        maven { url 'https://plugins.gradle.org/m2/' }
+        mavenCentral()
+        mavenLocal()
         google()
+        jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
-
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-
-        classpath 'guru.stefma.bintrayrelease:bintrayrelease:1.1.2'
+        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath "io.github.gradle-nexus:publish-plugin:1.0.0"
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
+        mavenLocal()
         google()
-        maven {
-            url "http://dl.bintray.com/dadino/quickstart.rxjava2"
-        }
+        jcenter()
     }
 
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
 
 ext {
-    compileSdk = 28
+    compileSdk = 34
     minSdk = 21
-    targetSdk = 28
+    targetSdk = 34
 
-    userOrg = "dadino"
-    repoName = "quickstart.rxjava2"
-    groupId = "com.dadino.quickstart.rxjava2"
-    website = "https://github.com/dadino/basictoolbox"
-    descr = "Basic toolbox to quickly start coding"
-    bintrayUser = 'dadino'
-    bintrayKey = 'e23c567c5d38bdae821f0b74e855b07b37487762'
+    groupId = "io.github.dadino"
+    artifactId = "quickstart-rxjava2-map"
 
-    versionCode = 8
-    versionName = "0.4.6"
+    versionCode = 9
+    versionName = "0.5.0"
 
-    // ./gradlew clean build bintrayUpload -PdryRun=false
+    ossrhUsername = System.properties['ossrhUsername']
+    ossrhPassword = System.properties['ossrhPassword']
+    sonatypeStagingProfileId = System.properties['sonatypeStagingProfileId']
 }

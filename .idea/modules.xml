@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Quickstart1Map.iml" filepath="$PROJECT_DIR$/Quickstart1Map.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Quickstart1Map.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Quickstart1Map.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Quickstart1Map.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Quickstart1Map.app.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Quickstart1Map.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Quickstart1Map.app.unitTest.iml" />

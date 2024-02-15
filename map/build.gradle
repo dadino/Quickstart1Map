@@ -43,7 +43,7 @@ dependencies {
     implementation 'io.github.dadino:quickstart-rxjava2-core:0.7.0'
 
     //PLAY SERVICES
-    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+    api 'com.google.android.gms:play-services-maps:18.2.0'
 
     //SUPPORT
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'

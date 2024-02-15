@@ -1,25 +1,46 @@
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in /Users/davidcorsalini/Library/Android/sdk/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+-keep class it.contrammobilita.android.** { *; }
+-keep class com.google.android.gms.maps.model.Marker { *; }
 
-# Add any project specific keep options here:
+#For Crashlytics
+-keepattributes SourceFile,LineNumberTable        # Keep file names and line numbers.
+-keep public class * extends java.lang.Exception  # Optional: Keep custom exceptions.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-dontwarn com.squareup.okhttp.Cache
+-dontwarn com.squareup.okhttp.CacheControl$Builder
+-dontwarn com.squareup.okhttp.CacheControl
+-dontwarn com.squareup.okhttp.Call
+-dontwarn com.squareup.okhttp.OkHttpClient
+-dontwarn com.squareup.okhttp.Request$Builder
+-dontwarn com.squareup.okhttp.Request
+-dontwarn com.squareup.okhttp.Response
+-dontwarn com.squareup.okhttp.ResponseBody
+-dontwarn org.bouncycastle.jce.provider.BouncyCastleProvider
+-dontwarn org.bouncycastle.jsse.BCSSLParameters
+-dontwarn org.bouncycastle.jsse.BCSSLSocket
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider
+-dontwarn org.conscrypt.Conscrypt$Version
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.conscrypt.ConscryptHostnameVerifier
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+ # Keep generic signature of RxJava3 (R8 full mode strips signatures from non-kept items).
+ -keep,allowobfuscation,allowshrinking class io.reactivex.Flowable
+ -keep,allowobfuscation,allowshrinking class io.reactivex.Maybe
+ -keep,allowobfuscation,allowshrinking class io.reactivex.Observable
+ -keep,allowobfuscation,allowshrinking class io.reactivex.Single
+
+  # With R8 full mode generic signatures are stripped for classes that are not
+  # kept. Suspend functions are wrapped in continuations where the type argument
+  # is used.
+  -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+
+  # R8 full mode strips generic signatures from return types if not kept.
+  -if interface * { @retrofit2.http.* public *** *(...); }
+  -keep,allowoptimization,allowshrinking,allowobfuscation class <3>
+
+  # With R8 full mode generic signatures are stripped for classes that are not kept.
+  -keep,allowobfuscation,allowshrinking class retrofit2.Response

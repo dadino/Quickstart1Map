@@ -95,21 +95,6 @@ task printProps {
     }
 }
 
-nexusPublishing {
-    packageGroup = PUBLISH_GROUP_ID
-
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-
-            username = rootProject.ext.ossrhUsername
-            password = rootProject.ext.ossrhPassword
-            stagingProfileId = rootProject.ext.sonatypeStagingProfileId
-        }
-    }
-}
-
 signing {
     sign publishing.publications.release
 }
